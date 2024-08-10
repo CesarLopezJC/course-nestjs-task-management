@@ -1,21 +1,27 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Task, TaskStatus } from './task.model';
 import { v4 as uuid } from 'uuid';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { searchStatusFilterDTO } from './dto/search-status-filter.dto';
 import { UpdateTaskSatusDto } from './dto/update-task-status.dto';
+import { PrismaService } from '../prisma/prisma.service';
+import { Task } from '@prisma/client';
 
 @Injectable()
 export class TasksService {
-    private tasks: Task[] = [];
+    constructor(private prisma: PrismaService) { }
+    // private tasks: Task[] = [];
 
-    getAllTasks() {
-        return this.tasks;
-    }
+    // async getAllTasks(): Promise<Task[]> {
+    //     return this.prisma.task.findMany();
+    // }
 
-    getTaskById(id: string) {
+    async getTaskById(id: string): Promise<Task> {
         //try to get task
-        const found = this.tasks.find(task => task.id == id);
+        const found = await this.prisma.task.findFirst({
+            where: {
+                id: id,
+            }
+        });
 
         // if not found, throw an error (404 not found)
         if (!found) {
@@ -26,49 +32,72 @@ export class TasksService {
         return found;
     }
 
-    getFilteredTasks(filter: searchStatusFilterDTO) {
+    async getFilteredTasks(filter: searchStatusFilterDTO): Promise<Task[]> {
         const { status, search } = filter;
-        //Temporal variable
-        let tasks = this.getAllTasks();
 
-        if (status) {
-            tasks = tasks.filter(task => task.status === status);
-        }
+        const tasks = await this.prisma.task.findMany({
+            where: {
+                status: status,
+                AND: [
+                    {
+                        OR: [
+                            {
+                                description: {
+                                    contains: search,
+                                    mode: 'insensitive', // it allows us to match lowercase letters and uppercase letters
+                                }
+                            },
+                            {
+                                title: {
+                                    contains: search,
+                                    mode: 'insensitive', // it allows us to match lowercase letters and uppercase letters
+                                }
+                            }
+                        ]
+                    }
+                ]
 
-        if (search) {
-            tasks = tasks.filter(task => {
-                return (task.description.includes(search) || task.title.includes(search))
-            });
-        }
+            }
+        });
 
         return tasks;
     }
 
-    createTask(createTaskDto: CreateTaskDto): Task {
+    async createTask(createTaskDto: CreateTaskDto): Promise<Task> {
         const { title, description } = createTaskDto;
 
-        const task: Task = {
-            id: uuid(),
-            title,
-            description,
-            status: TaskStatus.OPEN,
-        }
-
-        this.tasks.push(task);
+        const task = await this.prisma.task.create({
+            data: {
+                title,
+                description,
+                status: "OPEN",
+            }
+        })
 
         return task;
     }
 
-    deleteTask(id: string) {
-        const found = this.getTaskById(id);
-        this.tasks = this.tasks.filter(task => task.id != found.id);
+    async deleteTask(id: string) {
+        await this.getTaskById(id);
+        await this.prisma.task.delete({
+            where: {
+                id: id
+            }
+        });
     }
 
-    updateTaskStatus(id: string, updateTaskSatusDto: UpdateTaskSatusDto) {
-        const task = this.getTaskById(id);
+    async updateTaskStatus(id: string, updateTaskSatusDto: UpdateTaskSatusDto): Promise<Task> {
+        await this.getTaskById(id);
         const { status } = updateTaskSatusDto;
 
-        task.status = status;
+        const task = await this.prisma.task.update({
+            where: {
+                id: id
+            },
+            data: {
+                status: status
+            }
+        });
 
         return task;
     }

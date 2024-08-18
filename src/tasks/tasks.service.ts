@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { v4 as uuid } from 'uuid';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { searchStatusFilterDTO } from './dto/search-status-filter.dto';
@@ -63,18 +63,23 @@ export class TasksService {
         return tasks;
     }
 
-    async createTask(createTaskDto: CreateTaskDto): Promise<Task> {
+    async createTask(createTaskDto: CreateTaskDto, userId: string): Promise<Task> {
         const { title, description } = createTaskDto;
 
-        const task = await this.prisma.task.create({
-            data: {
-                title,
-                description,
-                status: "OPEN",
-            }
-        })
+        try {
+            const task = await this.prisma.task.create({
+                data: {
+                    title,
+                    description,
+                    status: "OPEN",
+                    userId: userId,
+                }
+            });
 
-        return task;
+            return task;
+        } catch (error) {
+            throw new ConflictException("Check your token.")
+        }
     }
 
     async deleteTask(id: string) {

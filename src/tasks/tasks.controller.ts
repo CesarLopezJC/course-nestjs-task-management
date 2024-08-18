@@ -1,4 +1,5 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { Task } from '@prisma/client';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { searchStatusFilterDTO } from './dto/search-status-filter.dto';
@@ -6,6 +7,7 @@ import { UpdateTaskSatusDto } from './dto/update-task-status.dto';
 import { TasksService } from './tasks.service';
 
 @Controller('tasks')
+@UseGuards(AuthGuard())
 export class TasksController {
     constructor(private tasksService: TasksService) { }
 
@@ -28,9 +30,11 @@ export class TasksController {
 
     @Post()
     async createTask(
-        @Body() createTaskDto: CreateTaskDto
+        @Body() createTaskDto: CreateTaskDto,
+        @Req() req //user data
     ): Promise<Task> {
-        return this.tasksService.createTask(createTaskDto);
+        // console.log(req.user); //user data
+        return this.tasksService.createTask(createTaskDto, req.user.id);
     }
 
     @Delete('/:id')
@@ -40,7 +44,7 @@ export class TasksController {
 
     @Patch('/:id/status')
     async updateTaskStatus(@Param('id') id: string,
-        @Body() updateTaskSatusDto: UpdateTaskSatusDto
+        @Body() updateTaskSatusDto: UpdateTaskSatusDto,
     ): Promise<Task> {
         return this.tasksService.updateTaskStatus(id, updateTaskSatusDto)
     }

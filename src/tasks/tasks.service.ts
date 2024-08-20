@@ -15,11 +15,12 @@ export class TasksService {
     //     return this.prisma.task.findMany();
     // }
 
-    async getTaskById(id: string): Promise<Task> {
+    async getTaskById(id: string, user: string): Promise<Task> {
         //try to get task
         const found = await this.prisma.task.findFirst({
             where: {
                 id: id,
+                userId: user
             }
         });
 
@@ -32,7 +33,7 @@ export class TasksService {
         return found;
     }
 
-    async getFilteredTasks(filter: searchStatusFilterDTO): Promise<Task[]> {
+    async getFilteredTasks(filter: searchStatusFilterDTO, user: string): Promise<Task[]> {
         const { status, search } = filter;
 
         const tasks = await this.prisma.task.findMany({
@@ -54,6 +55,9 @@ export class TasksService {
                                 }
                             }
                         ]
+                    },
+                    {
+                        userId: user
                     }
                 ]
 
@@ -82,8 +86,8 @@ export class TasksService {
         }
     }
 
-    async deleteTask(id: string) {
-        await this.getTaskById(id);
+    async deleteTask(id: string, user: string) {
+        await this.getTaskById(id, user);
         await this.prisma.task.delete({
             where: {
                 id: id
@@ -91,8 +95,8 @@ export class TasksService {
         });
     }
 
-    async updateTaskStatus(id: string, updateTaskSatusDto: UpdateTaskSatusDto): Promise<Task> {
-        await this.getTaskById(id);
+    async updateTaskStatus(id: string, updateTaskSatusDto: UpdateTaskSatusDto, user: string): Promise<Task> {
+        await this.getTaskById(id, user);
         const { status } = updateTaskSatusDto;
 
         const task = await this.prisma.task.update({

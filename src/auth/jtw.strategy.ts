@@ -4,18 +4,20 @@ import { User } from "@prisma/client";
 import { ExtractJwt, Strategy } from "passport-jwt";
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtPayload } from "./jwt-payload.interface";
+import { ConfigService } from '@nestjs/config';
 
 //In this file the PassportStrategy is definded with a secret key and a kind of token in this case It's a bearer token
 @Injectable()
 //"extends" allows us to access the PassportStrategy function and uses it in our code
 export class JwtStrategy extends PassportStrategy(Strategy) {
     constructor(
-        private prisma: PrismaService
+        private prisma: PrismaService,
+        private configService: ConfigService
     ) {
         //"super" defines the passport strategy
         //It's recomended using an environment variable as a secret 
         super({
-            secretOrKey: 'topSecret51', //todo: Replace the string for an environment variable 
+            secretOrKey: configService.get('JWT_SECRET'), //todo: Replace the string for an environment variable 
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
         });
     }

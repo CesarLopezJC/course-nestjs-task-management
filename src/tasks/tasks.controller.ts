@@ -1,5 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Task, User } from '@prisma/client';
 import { GetUser } from 'src/auth/get-user.decorator';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { searchStatusFilterDTO } from './dto/search-status-filter.dto';
@@ -8,6 +10,8 @@ import { TasksService } from './tasks.service';
 
 @Controller('tasks')
 @UseGuards(AuthGuard())
+@ApiBearerAuth('JWT-auth')
+@ApiTags('Tasks')
 export class TasksController {
     constructor(private tasksService: TasksService) { }
 

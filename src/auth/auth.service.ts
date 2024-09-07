@@ -17,9 +17,6 @@ export class AuthService {
         const salt = await bcrypt.genSalt();
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        // console.log("salt", salt);
-        // console.log("hashedPassword", hashedPassword);
-
         try {
             await this.prisma.user.create({
                 data: {
@@ -28,7 +25,6 @@ export class AuthService {
                 }
             });
         } catch (error) {
-            // console.log(error);
             if (error.code == 'P2002') {
                 throw new ConflictException(`The requested name '${username}' is already registered`);
             }
@@ -42,9 +38,6 @@ export class AuthService {
                 username: username,
             }
         });
-
-        // console.log('user', user);
-        // console.log('bcrypt', await bcrypt.compareSync(password, user.password));
 
         // Do a comparetion of passwords
         if (user && (await bcrypt.compareSync(password, user.password))) {

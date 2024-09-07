@@ -33,7 +33,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         })
 
         if (!user.id) {
-            //WHen the user is unfounded, with this we avoid the request contionus 
+            //When the user is unfounded, with this we avoid the request contionus 
             throw new UnauthorizedException();
         }
 

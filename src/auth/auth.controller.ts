@@ -21,10 +21,4 @@ export class AuthController {
         const { username, password } = authCredecials;
         return this.authService.signIn(username, password);
     }
-
-    // @Post('/test')
-    // @UseGuards(AuthGuard())
-    // test(@Req() req) {
-    //     console.log(req);
-    // }
 }

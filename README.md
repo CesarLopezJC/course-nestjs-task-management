@@ -1,5 +1,5 @@
 # Description
-Nest.js Course - Tasks
+Nest.js - Course - Tasks Manager
 
 ## Diploy in development
 1. Clone repository
@@ -11,4 +11,12 @@ yarn install
 4. Deploy database  
 ```
 docker compose up -d
+```
+5. Execute the migrations of Prisma 
+```
+npx prisma migrate dev
+```
+6. Start the project
+```
+yarn start:dev
 ```

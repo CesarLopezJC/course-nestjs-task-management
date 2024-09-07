@@ -5,8 +5,8 @@ export class searchStatusFilterDTO {
     @IsOptional()
     @IsEnum(TaskStatus)
     @ApiProperty({
-        example: "Status",
-        description: "OPEN",
+        example: "OPEN",
+        description: "Status",
         required: false,
     })
     status?: TaskStatus;
@@ -14,8 +14,8 @@ export class searchStatusFilterDTO {
     @IsOptional()
     @IsString()
     @ApiProperty({
-        example: "Search",
-        description: "HR",
+        example: "HR",
+        description: "Search",
         required: false,
     })
     search?: string;
